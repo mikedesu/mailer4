@@ -14,6 +14,7 @@
 
 
 
+int num_valid_usernames = 0;
 char **valid_usernames = NULL;
 
 
@@ -21,7 +22,8 @@ char **valid_usernames = NULL;
 int lines_in_file(FILE *infile);
 void read_valid_usernames();
 void handle_mailfrom(char *line, char *from_user);
-void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) ;
+void handle_receipt_to(char *line, int *num_recipients, char *recipients[]);
+int is_valid_username(char *username);
 
 int main(int argc, char *argv[]) {
     int mailfrom_read_in = 0;
@@ -37,10 +39,10 @@ int main(int argc, char *argv[]) {
     // continue reading lines until we have no more
     while (fgets_result != NULL) {
         // just print out the line
-        printf("%s", line);
+        //printf("%s", line);
         if ( ! mailfrom_read_in ) {
             handle_mailfrom(line, from_user);   
-            printf("%s\n", from_user);
+            //printf("%s\n", from_user);
             mailfrom_read_in = 1;
         }
         else {
@@ -48,10 +50,10 @@ int main(int argc, char *argv[]) {
         }
         fgets_result = fgets(line, BUFFER_SIZE, stdin);
     }
-    printf("Num recipients: %d\n", num_recipients);
-    for (int i =0 ; i < num_recipients; i++) {
-        printf("%s\n", recipients[i]);
-    }
+    //printf("Num recipients: %d\n", num_recipients);
+    //for (int i =0 ; i < num_recipients; i++) {
+    //    printf("%s\n", recipients[i]);
+    //}
     return 0;
 }
 
@@ -61,7 +63,15 @@ void handle_mailfrom(char *line, char *from_user){
     if (r==0) {
         // read in "MAIL FROM", handle appropriately
         // copy just the part of the line after "MAIL FROM:"
+        
         strcpy(from_user, line + MAIL_FROM_PREFIX_SIZE );
+        from_user[ strlen(from_user)-1 ] = 0;
+        
+        if ( is_valid_username(from_user) == -1 ) {
+            printf("Invalid user: %s, exiting\n", from_user);
+            exit(-1);
+        }
+
         // print the user out just as proof we've successfully parsed the line
     }
     else {
@@ -84,6 +94,13 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
         }
 
         strcpy(recipients[index], line + RCPT_TO_PREFIX_SIZE); 
+        recipients[index][ strlen( recipients[index] ) - 1 ] = 0;
+
+        if ( is_valid_username( recipients[index] ) == -1 ) {
+            printf("Invalid user: %s, exiting\n", recipients[index]);
+            exit(-1);
+        }
+
 
         (*num_recipients)++;
     }
@@ -94,6 +111,21 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
 }
 
 
+
+// Returns 0 on success, -1 on failure
+int is_valid_username(char *username) {
+    int result = -1;
+    for (int i = 0; i < num_valid_usernames; i++) {
+        if ( strcmp(username, valid_usernames[i]) == 0 ) {
+            result = 0;
+            break;
+        }
+    }
+    return result;
+}
+
+
+
 void read_valid_usernames() {
     char *filename = "valid_usernames";
     FILE *infile = fopen(filename, "r");
@@ -101,18 +133,21 @@ void read_valid_usernames() {
         perror("Error opening file, exiting");
         exit(-1);
     }
+    
     int linecount = lines_in_file(infile) - 1;
-    printf("Valid username count: %d\n", linecount);
+    
+    num_valid_usernames = linecount;
+    //printf("Valid username count: %d\n", linecount);
     rewind(infile);
 
     // actually malloc username array and read in usernames
-    valid_usernames = (char **)calloc(sizeof(char*), linecount);
+    valid_usernames = (char **)calloc(sizeof(char*), num_valid_usernames);
     if (valid_usernames==NULL) {
         perror("Error callocing valid_usernames, exiting");
         exit(-1);
     }
 
-    for (int i = 0; i < linecount; i++) {
+    for (int i = 0; i < num_valid_usernames; i++) {
         
         valid_usernames[i] = (char *)calloc(sizeof(char), BUFFER_SIZE);
         if (valid_usernames[i]==NULL) {
@@ -123,7 +158,7 @@ void read_valid_usernames() {
         // chop off the newline by overwriting it with a NULL or '\0' or 0 byte
         int end_of_line = strlen(valid_usernames[i]);
         valid_usernames[i][end_of_line-1] = 0;
-        printf("Proof: %s\n", valid_usernames[i]);
+        //printf("Proof: %s\n", valid_usernames[i]);
     }
 
 
