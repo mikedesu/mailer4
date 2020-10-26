@@ -12,6 +12,12 @@
 3. End of DATA (.) 
 */
 
+
+
+char **valid_usernames = NULL;
+
+
+
 int lines_in_file(FILE *infile);
 void read_valid_usernames();
 void handle_mailfrom(char *line, char *from_user);
@@ -23,7 +29,6 @@ int main(int argc, char *argv[]) {
     int num_recipients = 0;
     char *recipients[BUFFER_SIZE] = {0};
     char line[BUFFER_SIZE] = {0};
-
 
     read_valid_usernames();
 
@@ -96,11 +101,32 @@ void read_valid_usernames() {
         perror("Error opening file, exiting");
         exit(-1);
     }
-    int lc = lines_in_file(infile);
-    printf("Valid username count: %d\n", lc);
+    int linecount = lines_in_file(infile) - 1;
+    printf("Valid username count: %d\n", linecount);
     rewind(infile);
 
     // actually malloc username array and read in usernames
+    valid_usernames = (char **)calloc(sizeof(char*), linecount);
+    if (valid_usernames==NULL) {
+        perror("Error callocing valid_usernames, exiting");
+        exit(-1);
+    }
+
+    for (int i = 0; i < linecount; i++) {
+        
+        valid_usernames[i] = (char *)calloc(sizeof(char), BUFFER_SIZE);
+        if (valid_usernames[i]==NULL) {
+            perror("Error callocing valid_usernames[i], exiting");
+            exit(-1);
+        }
+        fgets(valid_usernames[i], BUFFER_SIZE, infile);
+        // chop off the newline by overwriting it with a NULL or '\0' or 0 byte
+        int end_of_line = strlen(valid_usernames[i]);
+        valid_usernames[i][end_of_line-1] = 0;
+        printf("Proof: %s\n", valid_usernames[i]);
+    }
+
+
 
     fclose(infile);
 }
