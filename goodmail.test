@@ -1,7 +1,7 @@
 MAIL FROM:muermo
 RCPT TO:repine
 RCPT TO:whaledom
-DATA:
+DATA
 This is a test email.. Looks pretty weird having two periods everywhere.. 
 This line is the last line..
 .

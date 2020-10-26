@@ -18,12 +18,17 @@ int num_valid_usernames = 0;
 char **valid_usernames = NULL;
 
 
+int receipt_to_handled = 0;
+
+
 
 int lines_in_file(FILE *infile);
 void read_valid_usernames();
 void handle_mailfrom(char *line, char *from_user);
 void handle_receipt_to(char *line, int *num_recipients, char *recipients[]);
 int is_valid_username(char *username);
+
+
 
 int main(int argc, char *argv[]) {
     int mailfrom_read_in = 0;
@@ -42,11 +47,16 @@ int main(int argc, char *argv[]) {
         //printf("%s", line);
         if ( ! mailfrom_read_in ) {
             handle_mailfrom(line, from_user);   
-            //printf("%s\n", from_user);
+            printf("From: %s\n", from_user);
             mailfrom_read_in = 1;
         }
-        else {
+        else if (receipt_to_handled == 0) {
             handle_receipt_to(line, &num_recipients, recipients);
+        }
+        else {
+            // just print the line because that's what happens here
+            printf("%s", line);
+
         }
         fgets_result = fgets(line, BUFFER_SIZE, stdin);
     }
@@ -101,12 +111,23 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
             exit(-1);
         }
 
+        printf("To: %s\n", recipients[index]);
 
         (*num_recipients)++;
     }
     else {
-        printf("Error, expecting RCPT TO, exiting...\n");
-        exit(-1);
+
+        int r0 = strncmp(line, "DATA", 4);
+        if (r0 == 0) {
+            // handle DATA
+            //printf("handle DATA\n");
+            printf("\n\n");
+            receipt_to_handled = 1;
+        }
+        else {
+            printf("Error, expecting DATA, got [%s], exiting...\n", line);
+            exit(-1);
+        }
     }
 }
 
