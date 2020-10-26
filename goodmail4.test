@@ -1,0 +1,8 @@
+MAIL FROM:mike
+RCPT TO:jason
+RCPT TO:ryan
+DATA:
+This is a test email.. Looks pretty weird having two periods everywhere.. 
+This line is the last line..
+.
+
