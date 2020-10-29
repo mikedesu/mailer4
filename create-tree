@@ -1,0 +1,13 @@
+#!/bin/bash
+
+rm -rf $1;
+
+mkdir -p $1/{bin,mail,inputs,tmp}
+
+while read -r i; do
+    mkdir -p $1/mail/$i;
+done < valid_usernames; 
+
+cp *.test $1/inputs/. 
+
+

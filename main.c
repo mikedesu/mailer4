@@ -19,7 +19,7 @@ char **valid_usernames = NULL;
 int receipt_to_handled = 0;
 
 
-int lines_in_file(FILE *infile);
+//int lines_in_file(FILE *infile);
 //void read_valid_usernames();
 void handle_mailfrom(char *line, char *from_user);
 void handle_receipt_to(char *line, int *num_recipients, char *recipients[]);
@@ -40,7 +40,9 @@ int main(int argc, char *argv[]) {
         // just print out the line
         if ( ! mailfrom_read_in ) {
             handle_mailfrom(line, from_user);   
+            
             printf("From: %s\n", from_user);
+            
             mailfrom_read_in = 1;
         }
         else if (receipt_to_handled == 0) {
@@ -59,6 +61,7 @@ int main(int argc, char *argv[]) {
 
 
 void handle_mailfrom(char *line, char *from_user){
+    //printf("handle_mailfrom: [%s] [%s]\n", line, from_user);
     // check to see if the first 10 chars are "MAIL FROM:"
     int r = strncmp(line, "MAIL FROM:", MAIL_FROM_PREFIX_SIZE);
     if (r==0) {
@@ -81,7 +84,10 @@ void handle_mailfrom(char *line, char *from_user){
 
 
 void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
+    //printf("handle_receipt_to: [%s] [%d]\n", line, *num_recipients);
     int r = strncmp(line, "RCPT TO:", RCPT_TO_PREFIX_SIZE);
+    int r0 = strncmp(line, "DATA", 4);
+    int r1 = strncmp(line, "\n", 1);
     if (r==0) {
         //printf("--is receipt line--\n");   
         int index = *num_recipients;
@@ -99,18 +105,17 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
         printf("To: %s\n", recipients[index]);
         (*num_recipients)++;
     }
+    else if (r0 == 0) {
+        //printf("handle DATA\n\n");
+        receipt_to_handled = 1;
+    }
+    else if (r1 == 0) {
+        fprintf(stderr, "Error processing handle_receipt_to, line contained blank line\n" );
+        exit(-1);
+    }
     else {
-        int r0 = strncmp(line, "DATA", 4);
-        if (r0 == 0) {
-            // handle DATA
-            //printf("handle DATA\n");
-            printf("\n\n");
-            receipt_to_handled = 1;
-        }
-        else {
-            printf("Error, expecting DATA, got [%s], exiting...\n", line);
-            exit(-1);
-        }
+        fprintf(stderr, "Error processing handle_receipt_to, line contained: [%s]\n", line);
+        exit(-1);
     }
 }
 
@@ -167,7 +172,7 @@ void read_valid_usernames() {
 }
 */
 
-
+/*
 int lines_in_file(FILE *infile) {
     // count lines in file
     int lines = 0;
@@ -178,4 +183,5 @@ int lines_in_file(FILE *infile) {
     }
     return lines;
 }
+*/
 
