@@ -16,18 +16,14 @@
 
 int num_valid_usernames = 0;
 char **valid_usernames = NULL;
-
-
 int receipt_to_handled = 0;
 
 
-
 int lines_in_file(FILE *infile);
-void read_valid_usernames();
+//void read_valid_usernames();
 void handle_mailfrom(char *line, char *from_user);
 void handle_receipt_to(char *line, int *num_recipients, char *recipients[]);
-int is_valid_username(char *username);
-
+//int is_valid_username(char *username);
 
 
 int main(int argc, char *argv[]) {
@@ -36,15 +32,12 @@ int main(int argc, char *argv[]) {
     int num_recipients = 0;
     char *recipients[BUFFER_SIZE] = {0};
     char line[BUFFER_SIZE] = {0};
-
-    read_valid_usernames();
-
+    //read_valid_usernames();
     // read first line
     char *fgets_result = fgets(line, BUFFER_SIZE, stdin);
     // continue reading lines until we have no more
     while (fgets_result != NULL) {
         // just print out the line
-        //printf("%s", line);
         if ( ! mailfrom_read_in ) {
             handle_mailfrom(line, from_user);   
             printf("From: %s\n", from_user);
@@ -55,17 +48,15 @@ int main(int argc, char *argv[]) {
         }
         else {
             // just print the line because that's what happens here
+            // we will have to come back and scrub the lines for periods
+            // as well as handle end-of-mail and possible other mails in this file
             printf("%s", line);
-
         }
         fgets_result = fgets(line, BUFFER_SIZE, stdin);
     }
-    //printf("Num recipients: %d\n", num_recipients);
-    //for (int i =0 ; i < num_recipients; i++) {
-    //    printf("%s\n", recipients[i]);
-    //}
     return 0;
 }
+
 
 void handle_mailfrom(char *line, char *from_user){
     // check to see if the first 10 chars are "MAIL FROM:"
@@ -73,15 +64,12 @@ void handle_mailfrom(char *line, char *from_user){
     if (r==0) {
         // read in "MAIL FROM", handle appropriately
         // copy just the part of the line after "MAIL FROM:"
-        
         strcpy(from_user, line + MAIL_FROM_PREFIX_SIZE );
         from_user[ strlen(from_user)-1 ] = 0;
-        
-        if ( is_valid_username(from_user) == -1 ) {
-            printf("Invalid user: %s, exiting\n", from_user);
-            exit(-1);
-        }
-
+        //if ( is_valid_username(from_user) == -1 ) {
+        //    printf("Invalid user: %s, exiting\n", from_user);
+        //    exit(-1);
+        //}
         // print the user out just as proof we've successfully parsed the line
     }
     else {
@@ -91,32 +79,27 @@ void handle_mailfrom(char *line, char *from_user){
     }
 }
 
+
 void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
     int r = strncmp(line, "RCPT TO:", RCPT_TO_PREFIX_SIZE);
     if (r==0) {
         //printf("--is receipt line--\n");   
         int index = *num_recipients;
-        
         recipients[index] = (char *)calloc(sizeof(char), BUFFER_SIZE);
         if (recipients[index]==NULL) {
             printf("Error callocing recipients[index], exiting...\n");
             exit(-1);
         }
-
         strcpy(recipients[index], line + RCPT_TO_PREFIX_SIZE); 
         recipients[index][ strlen( recipients[index] ) - 1 ] = 0;
-
-        if ( is_valid_username( recipients[index] ) == -1 ) {
-            printf("Invalid user: %s, exiting\n", recipients[index]);
-            exit(-1);
-        }
-
+        //if ( is_valid_username( recipients[index] ) == -1 ) {
+        //    printf("Invalid user: %s, exiting\n", recipients[index]);
+        //    exit(-1);
+        //}
         printf("To: %s\n", recipients[index]);
-
         (*num_recipients)++;
     }
     else {
-
         int r0 = strncmp(line, "DATA", 4);
         if (r0 == 0) {
             // handle DATA
@@ -132,8 +115,8 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
 }
 
 
-
 // Returns 0 on success, -1 on failure
+/*
 int is_valid_username(char *username) {
     int result = -1;
     for (int i = 0; i < num_valid_usernames; i++) {
@@ -144,9 +127,9 @@ int is_valid_username(char *username) {
     }
     return result;
 }
+*/
 
-
-
+/*
 void read_valid_usernames() {
     char *filename = "valid_usernames";
     FILE *infile = fopen(filename, "r");
@@ -156,7 +139,6 @@ void read_valid_usernames() {
     }
     
     int linecount = lines_in_file(infile) - 1;
-    
     num_valid_usernames = linecount;
     //printf("Valid username count: %d\n", linecount);
     rewind(infile);
@@ -181,11 +163,9 @@ void read_valid_usernames() {
         valid_usernames[i][end_of_line-1] = 0;
         //printf("Proof: %s\n", valid_usernames[i]);
     }
-
-
-
     fclose(infile);
 }
+*/
 
 
 int lines_in_file(FILE *infile) {
@@ -198,5 +178,4 @@ int lines_in_file(FILE *infile) {
     }
     return lines;
 }
-
 
