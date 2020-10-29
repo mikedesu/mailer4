@@ -12,8 +12,6 @@
 3. End of DATA (.) 
 */
 
-
-
 int num_valid_usernames = 0;
 char **valid_usernames = NULL;
 int receipt_to_handled = 0;
