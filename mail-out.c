@@ -61,7 +61,7 @@ void read_from_stdin() {
     while (! feof(stdin) ) { 
         char buf[1024] = {0};
         fgets(buf, 1024, stdin);
-        printf("%s\n", buf);
+        printf("%s", buf);
     }
 }
 

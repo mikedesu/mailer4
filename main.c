@@ -23,6 +23,59 @@ void handle_mailfrom(char *line, char *from_user);
 void handle_receipt_to(char *line, int *num_recipients, char *recipients[]);
 //int is_valid_username(char *username);
 
+int handle_line(char *line);
+
+int handle_line(char *line) {
+    int i = 0;
+    int len = strlen(line);
+    // is the line a single period?
+    int result = strcmp(line, ".\n");
+    if (result==0) {
+        return 1;     
+    }
+
+    while (i < len-1) {
+        char c = line[i];
+        
+        if (c != '.') {
+            putchar(c);
+        }
+        else {
+            
+            char d = line[i+1];
+
+            if (d == '.') {
+                putchar(c);
+                i++;
+            }
+        }
+
+        /*
+        if (c == '.') {
+            if (i < len-1) {
+                char d = line[i+1];
+                if (d == '.') {
+                    putchar('.');
+                    i++;
+                }
+            }
+            // else we have experienced 1 period at the end of a line
+            // and that should be an error, according to the specification
+            //else {
+            //    fprintf(stderr, "Error: Mail data contained a line ending in a single period. Exiting\n");
+            //    exit(-1);
+            //}
+        } 
+        */
+
+        i++;
+    }
+
+    putchar('\n');
+
+    return 0;
+}
+
 
 int main(int argc, char *argv[]) {
     int mailfrom_read_in = 0;
@@ -36,22 +89,37 @@ int main(int argc, char *argv[]) {
     // continue reading lines until we have no more
     while (fgets_result != NULL) {
         // just print out the line
-        if ( ! mailfrom_read_in ) {
-            handle_mailfrom(line, from_user);   
-            
-            printf("From: %s\n", from_user);
-            
-            mailfrom_read_in = 1;
+        
+        //printf("LINE: [%s]\n", line);
+
+        if ( strcmp( line, "\n" ) != 0 ) {
+            if ( ! mailfrom_read_in ) {
+                handle_mailfrom(line, from_user);   
+                
+                printf("From: %s\n", from_user);
+                
+                mailfrom_read_in = 1;
+            }
+            else if (receipt_to_handled == 0) {
+                handle_receipt_to(line, &num_recipients, recipients);
+            }
+            else {
+                // just print the line because that's what happens here
+                // we will have to come back and scrub the lines for periods
+                // as well as handle end-of-mail and possible other mails in this file
+                int r = handle_line(line);
+
+                // is end-of-mail?
+                if (r==1) {
+                    //printf("Is end-of-mail\n");
+                    putchar('\n');
+                    mailfrom_read_in = 0;
+                    receipt_to_handled = 0;
+                }
+                // more lines to read in for this mail
+            }
         }
-        else if (receipt_to_handled == 0) {
-            handle_receipt_to(line, &num_recipients, recipients);
-        }
-        else {
-            // just print the line because that's what happens here
-            // we will have to come back and scrub the lines for periods
-            // as well as handle end-of-mail and possible other mails in this file
-            printf("%s", line);
-        }
+        
         fgets_result = fgets(line, BUFFER_SIZE, stdin);
     }
     return 0;
