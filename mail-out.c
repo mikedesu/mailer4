@@ -59,13 +59,15 @@ int validate_username(char *username) {
 
 void read_from_stdin() {
     
-    printf("read_from_stdin\n");
-    /*
+    //printf("read_from_stdin\n");
+    printf("----------\n");
       while (! feof(stdin) ) { 
         char buf[1024] = {0};
         fgets(buf, 1024, stdin);
         printf("%s", buf);
     }
+
+    /*
     */
 }
 

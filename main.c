@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define BUFFER_SIZE           1024
 #define MAIL_FROM_PREFIX_SIZE 10
@@ -105,6 +107,18 @@ int main(int argc, char *argv[]) {
                     //}
 
                     //printf("fork\n");
+                    //
+
+
+                    // set up our pipe between parent and child
+                    //int mypipe[2];
+                    //int pipe_result = pipe(mypipe);
+                    //if (pipe_result == -1) {
+                    //    perror("Error piping");
+                    //    exit(-1);
+                    //}
+
+
                     int cpid = fork();
                     // child
                     if (cpid == 0) {
@@ -112,7 +126,30 @@ int main(int argc, char *argv[]) {
                         my_id++;
                         //printf(":::child my_id: %d\n", my_id);
 
-                        printf(":::from_user: %s\n", from_user);
+                        char filename[1024] = {0};
+                        sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
+                        //printf(":::from_user: %s\n", from_user);
+                        //printf(":::filename: %s\n", filename);
+
+                        int tmpmail_fd = open(filename, O_RDONLY);
+                        if (tmpmail_fd == -1) {
+                            perror ("Failed to open file");
+                            exit(-1);
+                        }
+
+                        // redirect stdin to our file
+                        int dup2_result = dup2( tmpmail_fd, STDIN_FILENO );
+                        if (dup2_result == -1) {
+                            perror("dup2 error");
+                            exit(-1);
+                        }
+
+                        close(tmpmail_fd);
+
+                        /*
+                        */
+
+
 
                         char *mailout_argv[] = {
                             "./mail-out",
