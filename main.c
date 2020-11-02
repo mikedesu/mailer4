@@ -98,19 +98,33 @@ int main(int argc, char *argv[]) {
 
                     //handle_end_of_mail();
                     
-                    bzero( from_user, 1024 );
+                    //bzero( from_user, 1024 );
 
                     //for (int i = 0; i < BUFFER_SIZE; i++) {
                     //    bzero( recipients[i], 1024 );
                     //}
 
-                    printf("fork\n");
+                    //printf("fork\n");
                     int cpid = fork();
                     // child
                     if (cpid == 0) {
                         
                         my_id++;
-                        printf(":::child my_id: %d\n", my_id);
+                        //printf(":::child my_id: %d\n", my_id);
+
+                        printf(":::from_user: %s\n", from_user);
+
+                        char *mailout_argv[] = {
+                            "./mail-out",
+                            from_user,
+                            NULL
+                        };
+                        execvp("./mail-out", mailout_argv);
+
+                        
+    
+                        
+
 
                         // mail-out from_user < tmpfile
                         //printf(":::child has file: %s\n", filename);
@@ -123,8 +137,8 @@ int main(int argc, char *argv[]) {
                         exit(0);
                     }
                     else if (cpid > 0) {
-                        printf("parent my_id: %d\n", my_id);
-                        //exit(0);
+                        // parent
+                        bzero( from_user, 1024 );
                     }
                     else {
                         perror("Error forking");
@@ -134,7 +148,7 @@ int main(int argc, char *argv[]) {
                     */
 
                     tmpfilename_count++;
-                    printf("moving on to next mail...%d\n", tmpfilename_count);
+                    //printf("moving on to next mail...%d\n", tmpfilename_count);
                 }
                 // more lines to read in for this mail
             }
@@ -151,7 +165,7 @@ int main(int argc, char *argv[]) {
 
 void handle_mailfrom(char *line, char *from_user){
     // check to see if the first 10 chars are "MAIL FROM:"
-    printf("handle_mailfrom: [%s]\n", line);
+    //printf("handle_mailfrom: [%s]\n", line);
     int r = strncmp(line, "MAIL FROM:", MAIL_FROM_PREFIX_SIZE);
     if (r==0) {
         // read in "MAIL FROM", handle appropriately
@@ -201,7 +215,7 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
 
 int handle_line(char *line) {
     
-    printf("handle_line %d: %s\n", my_id, line);
+    //printf("handle_line %d: %s\n", my_id, line);
 
     int i = 0;
     int len = strlen(line);
