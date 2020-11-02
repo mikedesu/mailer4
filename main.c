@@ -30,12 +30,33 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]);
 int handle_line(char *line);
 void open_tmp_file() ;
 void close_tmp_file() ;
+//void handle_end_of_mail() ;
 
 
 
 
+static int my_id = 0;
 
 
+/*
+void handle_end_of_mail() {
+    pid_t cpid = fork();
+
+    if (cpid==0) {
+        printf("child\n");
+
+        char filename[1024] = {0};
+        sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
+
+        my_id++;
+        
+        exit(0);
+
+    }
+    
+    printf("parent");
+}
+*/
 
 
 int main(int argc, char *argv[]) {
@@ -46,20 +67,15 @@ int main(int argc, char *argv[]) {
     int num_recipients = 0;
     char *recipients[BUFFER_SIZE] = {0};
     char line[BUFFER_SIZE] = {0};
-    //read_valid_usernames();
     // read first line
     char *fgets_result = fgets(line, BUFFER_SIZE, stdin);
     // continue reading lines until we have no more
     while (fgets_result != NULL) {
         if ( strcmp( line, "\n" ) != 0 ) {
             if ( ! mailfrom_read_in ) {
-                
                 open_tmp_file();
-                
                 handle_mailfrom(line, from_user);   
-                
                 fprintf(currentFile, "From: %s\n", from_user);
-                
                 mailfrom_read_in = 1;
             }
             else if (receipt_to_handled == 0) {
@@ -78,34 +94,56 @@ int main(int argc, char *argv[]) {
                     receipt_to_handled = 0;
                     //system("echo hello world");
                     close_tmp_file();
+         
+
+                    //handle_end_of_mail();
                     
-                    /*
+                    bzero( from_user, 1024 );
+
+                    //for (int i = 0; i < BUFFER_SIZE; i++) {
+                    //    bzero( recipients[i], 1024 );
+                    //}
+
+                    printf("fork\n");
                     int cpid = fork();
                     // child
                     if (cpid == 0) {
                         
-                        char filename[1024] = {0};
-                        sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
-                        
-                        printf("child has file: %s\n", filename);
+                        my_id++;
+                        printf(":::child my_id: %d\n", my_id);
 
+                        // mail-out from_user < tmpfile
+                        //printf(":::child has file: %s\n", filename);
                         // set up to execvp here
                         // for right now, just exit
                         // when we execvp, we will also need to get
                         // the return value in order to handle any
                         // errors from mail-out
 
-                        return 0;
+                        exit(0);
                     }
+                    else if (cpid > 0) {
+                        printf("parent my_id: %d\n", my_id);
+                        //exit(0);
+                    }
+                    else {
+                        perror("Error forking");
+                        exit(-1);
+                    }
+                    /*
                     */
 
                     tmpfilename_count++;
+                    printf("moving on to next mail...%d\n", tmpfilename_count);
                 }
                 // more lines to read in for this mail
             }
         }
         
+        bzero( line, BUFFER_SIZE );
+
         fgets_result = fgets(line, BUFFER_SIZE, stdin);
+
     }
     return 0;
 }
@@ -113,11 +151,13 @@ int main(int argc, char *argv[]) {
 
 void handle_mailfrom(char *line, char *from_user){
     // check to see if the first 10 chars are "MAIL FROM:"
-    printf("handle_mailfrom: %s\n", line);
+    printf("handle_mailfrom: [%s]\n", line);
     int r = strncmp(line, "MAIL FROM:", MAIL_FROM_PREFIX_SIZE);
     if (r==0) {
         // read in "MAIL FROM", handle appropriately
         // copy just the part of the line after "MAIL FROM:"
+        //printf(":::is mail from\n");
+
         strcpy(from_user, line + MAIL_FROM_PREFIX_SIZE );
         from_user[ strlen(from_user)-1 ] = 0;
     }
@@ -160,6 +200,9 @@ void handle_receipt_to(char *line, int *num_recipients, char *recipients[]) {
 
 
 int handle_line(char *line) {
+    
+    printf("handle_line %d: %s\n", my_id, line);
+
     int i = 0;
     int len = strlen(line);
     // is the line a single period?

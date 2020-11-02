@@ -9,5 +9,5 @@ mail-out:
 	$(CC) $(CFLAGS) mail-out.c -o mail-out
 
 clean:
-	rm -rf mail-in mail-out 
+	rm -rf mail-in mail-out tmpmail*
 
