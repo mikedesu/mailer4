@@ -66,8 +66,10 @@ int main(int argc, char *argv[]) {
 
     int mailfrom_read_in = 0;
     char from_user[1024] = {0};
+    
     int num_recipients = 0;
     char *recipients[BUFFER_SIZE] = {0};
+
     char line[BUFFER_SIZE] = {0};
     // read first line
     char *fgets_result = fgets(line, BUFFER_SIZE, stdin);
@@ -94,95 +96,74 @@ int main(int argc, char *argv[]) {
                     putchar('\n');
                     mailfrom_read_in = 0;
                     receipt_to_handled = 0;
-                    //system("echo hello world");
                     close_tmp_file();
          
 
-                    //handle_end_of_mail();
+                        int cpid = fork();
+                        // child
+                        if (cpid == 0) {
+                            
+                            my_id++;
+
+                            for (int i = 0; i < num_recipients; i++) {
+                            
+
+                                printf("recipient[%d]: %s\n", i, recipients[i]);
+
+                                int cpid2 = fork();
+                                if (cpid2 == 0) {
+
+                                    char filename[1024] = {0};
+                                    sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
+                                    int tmpmail_fd = open(filename, O_RDONLY);
+                                    if (tmpmail_fd == -1) {
+                                        perror ("Failed to open file");
+                                        exit(-1);
+                                    }
+
+                                    // redirect stdin to our file
+                                    int dup2_result = dup2( tmpmail_fd, STDIN_FILENO );
+                                    if (dup2_result == -1) {
+                                        perror("dup2 error");
+                                        exit(-1);
+                                    }
+                                    close(tmpmail_fd);
+
+                                    char *mailout_argv[] = {
+                                        "./mail-out",
+                                        
+                                        //from_user,
+                                        recipients[i],
+                                        
+                                        NULL
+                                    };
+                                    execvp("./mail-out", mailout_argv);
+                                    exit(0);
+                                }
+                            }
+                            exit(0);
+
+                        }
+                        else if (cpid > 0) {
+                            // parent
+                            bzero( from_user, 1024 );
+
+                            num_recipients = 0;
+                            for (int i = 0; i < num_recipients; i++) {
+                                bzero( recipients[i], BUFFER_SIZE );
+                            }
+
+                        }
+                        else {
+                            perror("Error forking");
+                            exit(-1);
+                        }    
+
+                    //}
+
+
+
                     
-                    //bzero( from_user, 1024 );
-
-                    //for (int i = 0; i < BUFFER_SIZE; i++) {
-                    //    bzero( recipients[i], 1024 );
-                    //}
-
-                    //printf("fork\n");
-                    //
-
-
-                    // set up our pipe between parent and child
-                    //int mypipe[2];
-                    //int pipe_result = pipe(mypipe);
-                    //if (pipe_result == -1) {
-                    //    perror("Error piping");
-                    //    exit(-1);
-                    //}
-
-
-                    int cpid = fork();
-                    // child
-                    if (cpid == 0) {
-                        
-                        my_id++;
-                        //printf(":::child my_id: %d\n", my_id);
-
-                        char filename[1024] = {0};
-                        sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
-                        //printf(":::from_user: %s\n", from_user);
-                        //printf(":::filename: %s\n", filename);
-
-                        int tmpmail_fd = open(filename, O_RDONLY);
-                        if (tmpmail_fd == -1) {
-                            perror ("Failed to open file");
-                            exit(-1);
-                        }
-
-                        // redirect stdin to our file
-                        int dup2_result = dup2( tmpmail_fd, STDIN_FILENO );
-                        if (dup2_result == -1) {
-                            perror("dup2 error");
-                            exit(-1);
-                        }
-
-                        close(tmpmail_fd);
-
-                        /*
-                        */
-
-
-
-                        char *mailout_argv[] = {
-                            "./mail-out",
-                            from_user,
-                            NULL
-                        };
-                        execvp("./mail-out", mailout_argv);
-
-                        
-    
-                        
-
-
-                        // mail-out from_user < tmpfile
-                        //printf(":::child has file: %s\n", filename);
-                        // set up to execvp here
-                        // for right now, just exit
-                        // when we execvp, we will also need to get
-                        // the return value in order to handle any
-                        // errors from mail-out
-
-                        exit(0);
-                    }
-                    else if (cpid > 0) {
-                        // parent
-                        bzero( from_user, 1024 );
-                    }
-                    else {
-                        perror("Error forking");
-                        exit(-1);
-                    }
-                    /*
-                    */
 
                     tmpfilename_count++;
                     //printf("moving on to next mail...%d\n", tmpfilename_count);

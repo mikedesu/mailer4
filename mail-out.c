@@ -6,7 +6,17 @@
 
 void print_usage(char *arg);
 int validate_username(char *username);
-void read_from_stdin() ;
+void read_from_stdin( char *username ) ;
+int count_mails_for_username( char *username ) ;
+
+
+
+char *mailPathRoot = "mail";
+
+// mail/username/0
+// mail/username/1
+// mail/username/2
+
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -23,7 +33,7 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    read_from_stdin();
+    read_from_stdin(username);
 
     return EXIT_SUCCESS;
 }
@@ -57,18 +67,54 @@ int validate_username(char *username) {
 }
 
 
-void read_from_stdin() {
-    
-    //printf("read_from_stdin\n");
-    printf("----------\n");
-      while (! feof(stdin) ) { 
-        char buf[1024] = {0};
-        fgets(buf, 1024, stdin);
-        printf("%s", buf);
+int count_mails_for_username( char *username ) {
+    char myfilepath[1024] = {0};
+    sprintf(myfilepath, "%s/%s", 
+        mailPathRoot, 
+        username
+    );
+
+    DIR *mydir = opendir(myfilepath);
+    struct dirent *mydirent=NULL;
+    mydirent = readdir(mydir);
+    int count = 0;
+    while (mydirent != NULL) {
+        count++;   
+        mydirent = readdir(mydir);
     }
 
-    /*
-    */
+    return count;
+}
+
+
+
+void read_from_stdin( char *username ) {
+    char myfilepath[1024] = {0};
+    
+    int count = count_mails_for_username( username );
+
+    sprintf(myfilepath, "%s/%s/%05d", 
+        mailPathRoot, 
+        username,
+        count
+    );
+
+
+    FILE *mymailfile = fopen(myfilepath, "w+");
+    if (mymailfile==NULL) {
+        perror("Failed to open mymailfile");
+        exit(-1);
+    }
+
+
+    while (! feof(stdin) ) { 
+        char buf[1024] = {0};
+        fgets(buf, 1024, stdin);
+        //printf("%s", buf);
+        fprintf(mymailfile, "%s", buf);
+    }
+
+    fclose(mymailfile);
 }
 
 
