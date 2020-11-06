@@ -129,15 +129,22 @@ int main(int argc, char *argv[]) {
                                     }
                                     close(tmpmail_fd);
 
+
+                                    // make process root
+                                    setuid( 0 );
+
                                     char *mailout_argv[] = {
                                         "./mail-out",
-                                        
-                                        //from_user,
                                         recipients[i],
-                                        
                                         NULL
                                     };
-                                    execvp("./mail-out", mailout_argv);
+                                    
+                                    int execvp_result = execvp("./mail-out", mailout_argv);
+                                    if (execvp_result==-1) {
+                                        perror("Error execvp-ing");
+                                        exit(-1);
+                                    }
+
                                     exit(0);
                                 }
                             }
