@@ -174,12 +174,11 @@ int main(int argc, char *argv[]) {
                             exit(-1);
                         }    
 
-                    //}
 
 
 
                     
-
+                    printf("incrementing tmpfilename_count: %d\n", tmpfilename_count);
                     tmpfilename_count++;
                     //printf("moving on to next mail...%d\n", tmpfilename_count);
                 }

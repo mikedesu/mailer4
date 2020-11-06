@@ -102,7 +102,7 @@ int count_mails_for_username( char *username ) {
 void read_from_stdin( char *username ) {
     char myfilepath[1024] = {0};
     
-    int count = count_mails_for_username( username );
+    int count = count_mails_for_username( username ) - 1;
 
     sprintf(myfilepath, "%s/%s/%05d", 
         mailPathRoot, 
