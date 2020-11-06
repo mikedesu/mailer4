@@ -1,8 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <sys/types.h>
+#include <sys/stat.h>
+
 #include <dirent.h>
+
+#include <unistd.h>
+
+#include <fcntl.h>
+
+#include "mPrint.h"
 
 void print_usage(char *arg);
 int validate_username(char *username);
@@ -100,6 +109,9 @@ void read_from_stdin( char *username ) {
     );
 
 
+    mPrint("Opening mymailfile");
+    printf("%s\n", myfilepath);
+
     FILE *mymailfile = fopen(myfilepath, "w+");
     if (mymailfile==NULL) {
         perror("Failed to open mymailfile");
@@ -115,6 +127,58 @@ void read_from_stdin( char *username ) {
     }
 
     fclose(mymailfile);
+
+
+    // set file owner by forking off a process to run chown
+    int cpid = fork();
+    if (cpid==0) {
+        // child will run execvp chown 
+        char owner_str[1024] = {0};
+        sprintf( owner_str, 
+            "%s:%s",
+            username,
+            username
+        );
+
+        char *chown_argv[] = {
+            "chown",
+            owner_str,
+            myfilepath,
+            NULL
+        };
+                                
+        int execvp_result = execvp("chown", chown_argv);
+        if (execvp_result==-1) {
+            perror("Error execvp-ing");
+            exit(-1);
+        }
+    }
+    else if (cpid>0) {
+        // parent
+    }
+    else {
+        perror("Error forking - this should prob never execute");
+        exit(-1);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

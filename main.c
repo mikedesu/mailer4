@@ -10,6 +10,8 @@
 #define MAIL_FROM_PREFIX_SIZE 10
 #define RCPT_TO_PREFIX_SIZE   8
 
+#include "mPrint.h"
+
 /*
 1. checking if a username is a valid username
 2. DATA handling
@@ -131,7 +133,13 @@ int main(int argc, char *argv[]) {
 
 
                                     // make process root
-                                    setuid( 0 );
+                                    /*
+                                    int setuid_result = setuid( 0 );
+                                    if (setuid_result == -1) {
+                                        perror("Failed to setuid_result");
+                                        exit(-1);
+                                    }
+                                    */
 
                                     char *mailout_argv[] = {
                                         "./mail-out",
@@ -277,10 +285,13 @@ int handle_line(char *line) {
 void open_tmp_file() {
     //printf("open_tmp_file\n");
 
+
     char filename[1024] = {0};
     sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
 
     //printf("filename: %s\n", filename);
+
+    mPrint("testing...");
 
     currentFile = fopen(filename, "w+");
     if (currentFile==NULL) {
