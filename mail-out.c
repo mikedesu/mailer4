@@ -20,7 +20,8 @@ int count_mails_for_username( char *username ) ;
 
 
 
-char *mailPathRoot = "mail";
+//char *mailPathRoot = "mail";
+char *mailPathRoot = "../mail";
 
 // mail/username/0
 // mail/username/1
@@ -53,7 +54,8 @@ void print_usage(char *arg) {
 
 int validate_username(char *username) {
     // open the mail directory
-    DIR* mydir = opendir("mail");
+    //DIR* mydir = opendir("mail");
+    DIR* mydir = opendir(mailPathRoot);
     if (mydir==NULL) {
         return -1;
     }

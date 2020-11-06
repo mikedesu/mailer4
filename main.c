@@ -22,8 +22,8 @@ int num_valid_usernames = 0;
 char **valid_usernames = NULL;
 int receipt_to_handled = 0;
 
-char *tmpfilename = "tmpmail";
-//char *tmpfilename = "../tmp/prefix";
+//char *tmpfilename = "tmpmail";
+char *tmpfilename = "../tmp/tmpmail";
 
 int tmpfilename_count = 0;
 FILE *currentFile = NULL;

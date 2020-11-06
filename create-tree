@@ -14,7 +14,7 @@ done < valid_usernames;
 
 cp *.test $1/inputs/. 
 
-cp test-script $1/.
+#cp test-script $1/.
 
 # build program, copy binaries into locations
 
