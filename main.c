@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
                                         recipients[i],
                                         NULL
                                     };
-                                    
+
                                     int execvp_result = execvp("./mail-out", mailout_argv);
                                     if (execvp_result==-1) {
                                         perror("Error execvp-ing");
@@ -191,6 +191,29 @@ int main(int argc, char *argv[]) {
         fgets_result = fgets(line, BUFFER_SIZE, stdin);
 
     }
+
+
+    // delete the tmp files here
+    
+
+    int cpid3 = fork();
+    if (cpid3 == 0) {
+        // child
+        //
+        char *rm_argv[] = {
+            "rm",
+            "../tmp/*",
+            NULL
+        };
+
+        int execvp_result = execvp("rm", rm_argv);
+        if (execvp_result==-1) {
+            perror("Error execvp-ing");
+            exit(-1);
+        }
+    }
+
+
     return 0;
 }
 

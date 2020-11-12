@@ -6,6 +6,9 @@ rm -rf $1;
 
 mkdir -p $1/{bin,mail,inputs,tmp}
 
+
+chmod -R 770 $1/tmp;
+
 while read -r i; do
     mkdir -p $1/mail/$i;
     chown -R $i:$i $1/mail/$i; # requires script be ran as root
