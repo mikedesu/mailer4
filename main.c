@@ -23,7 +23,8 @@ char **valid_usernames = NULL;
 int receipt_to_handled = 0;
 
 //char *tmpfilename = "tmpmail";
-char *tmpfilename = "../tmp/tmpmail";
+
+//char *tmpfilename = "../tmp/tmpmail";
 
 int tmpfilename_count = 0;
 FILE *currentFile = NULL;
@@ -115,11 +116,22 @@ int main(int argc, char *argv[]) {
                                 int cpid2 = fork();
                                 if (cpid2 == 0) {
 
-                                    char filename[1024] = {0};
-                                    sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
+                                    char filename[4096] = {0};
+                                    
+
+                                    char tmpfilename[1024] = {0};
+                                    char tmpfilename2[2048] = {0};
+                                    //chdir("../");
+                                    getcwd( tmpfilename, 1024 );
+                                    sprintf( tmpfilename2, "%s/tmp/tmpmail", tmpfilename );
+                                    sprintf( filename, "%s%d", tmpfilename2, tmpfilename_count );
+
+
+
                                     int tmpmail_fd = open(filename, O_RDONLY);
                                     if (tmpmail_fd == -1) {
                                         perror ("Failed to open file");
+                                        printf("filename: %s\n", filename);
                                         exit(-1);
                                     }
 
@@ -202,6 +214,7 @@ int main(int argc, char *argv[]) {
         //
         char *rm_argv[] = {
             "rm",
+            "-rf",
             "../tmp/*",
             NULL
         };
@@ -305,19 +318,20 @@ int handle_line(char *line) {
 
 
 void open_tmp_file() {
-    //printf("open_tmp_file\n");
-
-
-    char filename[1024] = {0};
-    sprintf( filename, "%s%d", tmpfilename, tmpfilename_count );
-
-    //printf("filename: %s\n", filename);
+    char tmpfilename[1024] = {0};
+    char tmpfilename2[2048] = {0};
+    //chdir("../");
+    getcwd( tmpfilename, 1024 );
+    sprintf( tmpfilename2, "%s/tmp/tmpmail", tmpfilename );
+    char filename[4096] = {0};
+    sprintf( filename, "%s%d", tmpfilename2, tmpfilename_count );
 
     mPrint("testing...");
 
     currentFile = fopen(filename, "w+");
     if (currentFile==NULL) {
         perror("Error opening file");
+        printf("filename: %s\n", filename);
         exit(-1);
     }
 }
