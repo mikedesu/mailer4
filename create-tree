@@ -4,8 +4,7 @@ set -euo pipefail  #proper error-checking support
 
 rm -rf $1;
 
-mkdir -p $1/{bin,mail,inputs,tmp}
-
+mkdir -p $1/{bin,mail,tmp}
 
 chmod -R 770 $1/tmp;
 
@@ -15,10 +14,6 @@ while read -r i; do
     chmod -R 770 $1/mail/$i;   # same 
 done < valid_usernames; 
 
-cp *.test $1/inputs/. 
-
-#cp test-script $1/.
-
 # build program, copy binaries into locations
 
 make clean; 
@@ -26,6 +21,4 @@ make;
 
 cp mail-in $1/bin/mail-in 
 cp mail-out $1/bin/mail-out
-
-cp *.test $1/inputs/. 
 
