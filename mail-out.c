@@ -1,16 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
-
 #include <dirent.h>
-
 #include <unistd.h>
-
 #include <fcntl.h>
-
 #include "mPrint.h"
 
 void print_usage(char *arg);
@@ -18,10 +13,10 @@ int validate_username(char *username);
 void read_from_stdin( char *username ) ;
 int count_mails_for_username( char *username ) ;
 
-
-
 //char *mailPathRoot = "mail";
-char *mailPathRoot = "../mail";
+
+//char *mailPathRoot = "../mail";
+char mailPathRoot[1024] = {0};
 
 // mail/username/0
 // mail/username/1
@@ -35,6 +30,11 @@ int main(int argc, char *argv[]) {
     }
     // username is argv[1]
     char *username = argv[1];
+
+    // update the mailPathRoot
+    getcwd( mailPathRoot, 1024 );
+    strcat( mailPathRoot, "/mail");
+
     // validate username
     int r = validate_username(username);
     // handle 
@@ -55,7 +55,9 @@ void print_usage(char *arg) {
 int validate_username(char *username) {
     // open the mail directory
     //DIR* mydir = opendir("mail");
+    
     DIR* mydir = opendir(mailPathRoot);
+    
     if (mydir==NULL) {
         return -1;
     }
@@ -79,7 +81,7 @@ int validate_username(char *username) {
 
 
 int count_mails_for_username( char *username ) {
-    char myfilepath[1024] = {0};
+    char myfilepath[2048] = {0};
     sprintf(myfilepath, "%s/%s", 
         mailPathRoot, 
         username
@@ -100,7 +102,7 @@ int count_mails_for_username( char *username ) {
 
 
 void read_from_stdin( char *username ) {
-    char myfilepath[1024] = {0};
+    char myfilepath[2048] = {0};
     
     int count = count_mails_for_username( username ) - 1;
 
