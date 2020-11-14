@@ -67,6 +67,20 @@ void handle_end_of_mail() {
 int main(int argc, char *argv[]) {
 
 
+    for (int i = 0; i < argc; i++) {
+        printf("argv[%d]: %s\n", 
+                i, 
+                argv[i]
+              );
+    }
+
+
+    char mailinPath[1024] = {0};
+    strncpy( mailinPath, argv[0], strlen( argv[0] ));
+
+
+
+
     int mailfrom_read_in = 0;
     char from_user[1024] = {0};
     
@@ -153,15 +167,28 @@ int main(int argc, char *argv[]) {
                                     }
                                     */
 
+
+
+
+                                    int n = strlen( mailinPath );
+                                        mailinPath[ n-2 ] = 'o';
+                                        mailinPath[ n-1 ] = 'u';
+                                        mailinPath[ n ] = 't';
+                                        mailinPath[ n+1 ] = 0;
+                                    char *mailoutPath = mailinPath;
+
+
+
                                     char *mailout_argv[] = {
-                                        "./mail-out",
+                                        mailoutPath,
                                         recipients[i],
                                         NULL
                                     };
 
-                                    int execvp_result = execvp("./mail-out", mailout_argv);
+                                    int execvp_result = execvp(mailoutPath, mailout_argv);
                                     if (execvp_result==-1) {
                                         perror("Error execvp-ing");
+                                        printf("mailoutPath: %s\n", mailoutPath);
                                         exit(-1);
                                     }
 
