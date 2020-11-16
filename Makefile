@@ -17,5 +17,5 @@ install:
 	sudo ./install-priv $(TREE)
 
 clean:
-	rm -rf mail-in mail-out tmpmail*
+	sudo rm -rf mail-in mail-out tmpmail* $(TREE) 
 
