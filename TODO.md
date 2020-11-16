@@ -1,5 +1,4 @@
 # TODO
 
-1. Create testing scripts
-2. Remove tmp files
+1. Remove tmp files
 
