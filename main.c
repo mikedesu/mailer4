@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
     int cpid3 = fork();
     if (cpid3 == 0) {
         // child
-        system("/usr/bin/rm -rfv tmp/*");
+        system("rm -rfv tmp/*");
     }
 
     return 0;
